@@ -1,10 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using ReservationService.Application.Commands.CreateReservation;
 using ReservationService.Application.Commands.CancelReservation;
 using ReservationService.Application.Commands.ConsumeReservation;
-using ReservationService.Application.Commands.CreateReservation;
-using ReservationService.Application.Dtos;
 using ReservationService.Application.Queries.GetReservation;
+using ReservationService.Application.Dtos;
 
 namespace ReservationService.API.Controllers;
 

@@ -6,10 +6,10 @@ using ReservationService.Application.Services;
 
 namespace ReservationService.Infrastructure.Messaging;
 
-public class RabbitMqPublisher : IBusPublisher, IDisposable
+public sealed class RabbitMqPublisher : IBusPublisher, IDisposable
 {
-    private readonly IConnection _conn;
-    private readonly IModel _ch;
+    private readonly RabbitMQ.Client.IConnection _conn;
+    private readonly RabbitMQ.Client.IModel _ch;
     private readonly ILogger<RabbitMqPublisher> _log;
     private const string EX = "flashsale.topic";
 
@@ -26,11 +26,16 @@ public class RabbitMqPublisher : IBusPublisher, IDisposable
     {
         var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload));
         var props = _ch.CreateBasicProperties();
-        props.ContentType = "application/json"; props.DeliveryMode = 2;
+        props.ContentType = "application/json";
+        props.DeliveryMode = 2;
         _ch.BasicPublish(EX, type, props, body);
         _log.LogInformation("Published {type}", type);
         return Task.CompletedTask;
     }
 
-    public void Dispose() { _ch?.Dispose(); _conn?.Dispose(); }
+    public void Dispose()
+    {
+        _ch?.Dispose();
+        _conn?.Dispose();
+    }
 }

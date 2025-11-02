@@ -1,7 +1,14 @@
 ﻿
+using FlashSaleDB;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using ReservationService.Application.Contracts;
+using ReservationService.Application.Services;
 using ReservationService.Infrastructure.Messaging;
 using ReservationService.Infrastructure.Redis;
 using ReservationService.Infrastructure.Services;
+using StackExchange.Redis;
 namespace ReservationService.Infrastructure;
 
 public static class ServiceCollectionExtensions
