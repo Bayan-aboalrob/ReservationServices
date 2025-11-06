@@ -1,23 +1,28 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using ReservationService.Application.Services;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using FlashSaleDB;
+using Microsoft.EntityFrameworkCore;
+using ReservationService.Application.Contracts;
 
-namespace ReservationService.Infrastructure.Services;
-
-public class SqlInventoryFinalizer : IInventoryFinalizer
+namespace ReservationService.Infrastructure.Services
 {
-    private readonly FlashSaleDbContext _db;
-    public SqlInventoryFinalizer(FlashSaleDbContext db) => _db = db;
-
-    public async Task<bool> FinalizeAsync(Guid productId, int qty, CancellationToken ct)
+    internal sealed class SqlInventoryFinalizer : IInventoryFinalizer
     {
-        var rows = await _db.Database.ExecuteSqlRawAsync(@"
-            UPDATE Inventory WITH (ROWLOCK, UPDLOCK)
-            SET AvailableQuantity = CASE WHEN AvailableQuantity >= @qty THEN AvailableQuantity - @qty ELSE AvailableQuantity END
-            WHERE ProductId = @pid AND AvailableQuantity >= @qty",
-            new[] { new SqlParameter("@qty", qty), new SqlParameter("@pid", productId) }, ct);
+        private readonly FlashSaleDbContext _db;
+        public SqlInventoryFinalizer(FlashSaleDbContext db) => _db = db;
 
-        return rows > 0;
+        public async Task<bool> FinalizeAsync(Guid productId, int quantity, CancellationToken ct = default)
+        {
+            if (quantity <= 0) return false;
+
+            var rows = await _db.Database.ExecuteSqlRawAsync(@"
+                UPDATE Inventory WITH (ROWLOCK, UPDLOCK)
+                SET AvailableQuantity = AvailableQuantity - {0}
+                WHERE ProductId = {1} AND AvailableQuantity >= {0};
+                ", new object[] { quantity, productId }, ct);
+
+            return rows > 0;
+        }
     }
 }

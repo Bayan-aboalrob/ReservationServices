@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <Folder Include="Common\" />
+    <Folder Include="Services\" />
     <Folder Include="Validators\" />
     <Folder Include="Profiles\" />
   </ItemGroup>

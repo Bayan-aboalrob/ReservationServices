@@ -1,13 +1,15 @@
-﻿using MediatR;
+﻿using System.Reflection;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ReservationService.Application;
-
-public static class ServiceCollectionExtensions
+namespace ReservationService.Application
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    public static class ServiceCollectionExtensions
     {
-        services.AddMediatR(typeof(ServiceCollectionExtensions).Assembly);
-        return services;
+        public static IServiceCollection AddApplication(this IServiceCollection services)
+        {
+            services.AddMediatR(Assembly.GetExecutingAssembly());
+            return services;
+        }
     }
 }
