@@ -36,6 +36,20 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "Instance1": {
+      "commandName": "Project",
+      "applicationUrl": "https://localhost:8080",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "Instance2": {
+      "commandName": "Project",
+      "applicationUrl": "https://localhost:8090",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     }
   }
 }
