@@ -1,8 +1,4 @@
-﻿// ReservationService.Application/Handlers/CreateReservationHandler.cs
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using ReservationService.Application.Commands.CreateReservation;
 using ReservationService.Application.Contracts;
 using ReservationService.Application.Dtos;
@@ -38,12 +34,19 @@ namespace ReservationService.Application.Handlers
 
             var payload = new
             {
-                dto.Id,
-                dto.UserId,
-                dto.ProductId,
-                dto.Quantity,
-                dto.ExpiryTimeUtc,
-                request.CorrelationId
+                userId = dto.UserId,
+                correlationId = request.CorrelationId,
+                expiresAtUtc = dto.ExpiryTimeUtc,
+                reservations = new[]
+                {
+                    new
+                    {
+                        reservationId = dto.Id,
+                        productId = dto.ProductId,
+                        quantity = dto.Quantity,
+                        expiryTimeUtc = dto.ExpiryTimeUtc
+                    }
+                }
             };
 
             if (request.ExecutionMode == ReservationExecutionMode.Synchronous)
@@ -52,7 +55,8 @@ namespace ReservationService.Application.Handlers
             }
             else
             {
-                _ = Task.Run(() => _bus.PublishAsync("Reservation.Created", payload, CancellationToken.None));
+                _ = Task.Run(() =>
+                    _bus.PublishAsync("Reservation.Created", payload, CancellationToken.None));
             }
 
             return dto;

@@ -28,6 +28,8 @@ namespace ReservationService.Infrastructure
             services.AddScoped<IInventoryFinalizer, SqlInventoryFinalizer>();
             services.AddSingleton<IBusPublisher, RabbitMqPublisher>();
 
+            services.AddScoped<ICartReader, EfCartReader>();
+
             services.AddHostedService<InventoryWarmupHostedService>();
 
             return services;
