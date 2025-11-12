@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ReservationService.Application.Contracts;
+using ReservationService.Application.Services;
 using ReservationService.Infrastructure.Messaging;
 using ReservationService.Infrastructure.Redis;
 using ReservationService.Infrastructure.Services;
@@ -31,6 +32,7 @@ namespace ReservationService.Infrastructure
             services.AddScoped<ICartReader, EfCartReader>();
 
             services.AddHostedService<InventoryWarmupHostedService>();
+            services.AddScoped<IHttpClientUtils, HttpClientUtils>();
 
             return services;
         }

@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\FlashSaleDB\FlashSaleDB\FlashSaleDB.csproj" />
+    <ProjectReference Include="..\..\FlashSaleDB\FlashSaleDB\FlashSaleDB.csproj" />
     <ProjectReference Include="..\ReservationService.Application\ReservationService.Application.csproj" />
     <ProjectReference Include="..\ReservationService.Infrastructure\ReservationService.Infrastructure.csproj" />
   </ItemGroup>

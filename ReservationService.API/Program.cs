@@ -1,6 +1,7 @@
 ﻿using ReservationService.Application;
 using ReservationService.Infrastructure;
 using Microsoft.OpenApi.Models;
+using ReservationService.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,10 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddHostedService<InfluxMetricsCollector>();
+
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 

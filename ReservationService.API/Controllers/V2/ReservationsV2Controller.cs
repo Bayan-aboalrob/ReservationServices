@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ReservationService.Application.Commands.CreateReservation;
 using ReservationService.Application.Dtos;
@@ -8,19 +6,19 @@ using ReservationService.Application.Dtos;
 namespace ReservationService.API.Controllers.V2
 {
     [ApiController]
-    [Route("api/v2/[controller]")]
+    [Route("api/v1/[controller]")]
     public sealed class ReservationsV2Controller : ControllerBase
     {
         private readonly IMediator _mediator;
         public ReservationsV2Controller(IMediator mediator) => _mediator = mediator;
 
-        [HttpPost]
-        public async Task<ActionResult<ReservationDto>> Create([FromBody] V2CreateReservationRequest req)
+        [HttpPost("from-cart")]
+        public async Task<ActionResult<IReadOnlyCollection<CartReservationResponse>>> CreateFromCart(
+            [FromBody] V1CreateReservationFromCartRequest req)
         {
-            var cmd = new CreateReservationCommand(
+            var cmd = new CreateCartReservationCommand(
                 req.UserId,
-                req.ProductId,
-                req.Quantity,
+                req.CartId,
                 req.TtlSeconds,
                 req.IdempotencyKey,
                 UseDistributedMode: true,
@@ -28,17 +26,37 @@ namespace ReservationService.API.Controllers.V2
                 ReservationExecutionMode.FireAndForgetBus
             );
 
-            var dto = await _mediator.Send(cmd);
-            return CreatedAtRoute("GetReservationById", new { id = dto.Id }, dto);
+            var list = await _mediator.Send(cmd);
+
+            var response = list
+                .Select(r => new CartReservationResponse(
+                    CartId: req.CartId,
+                    Id: r.Id,
+                    UserId: r.UserId,
+                    ExpiryTimeUtc: r.ExpiryTimeUtc,
+                    CreatedAtUtc: r.CreatedAtUtc,
+                    Status: r.Status
+                ))
+                .ToList();
+
+            return Ok(response);
         }
     }
 
-    public sealed record V2CreateReservationRequest(
+    public sealed record V1CreateReservationFromCartRequest(
         Guid UserId,
-        Guid ProductId,
-        int Quantity,
+        Guid CartId,
         int TtlSeconds,
         string? IdempotencyKey,
         string? CorrelationId
+    );
+
+    public sealed record CartReservationResponse(
+        Guid CartId,
+        Guid Id,
+        Guid UserId,
+        DateTime ExpiryTimeUtc,
+        DateTime CreatedAtUtc,
+        ReservationComputedStatus Status
     );
 }
