@@ -3,21 +3,13 @@ using ReservationService.Application.Dtos;
 
 namespace ReservationService.Application.Commands.CreateReservation
 {
-    // this enum will be used by v1 vs v2 controllers
-    public enum ReservationExecutionMode
-    {
-        Synchronous = 0,
-        FireAndForgetBus = 1
-    }
-
-    public sealed record CreateReservationCommand(
+    public sealed record CreateCartReservationCommand(
         Guid UserId,
-        Guid ProductId,
-        int Quantity,
+        Guid CartId,
         int TtlSeconds,
         string? IdempotencyKey,
         bool UseDistributedMode,
         string? CorrelationId,
         ReservationExecutionMode ExecutionMode
-    ) : IRequest<ReservationDto>;
+    ) : IRequest<IReadOnlyCollection<ReservationDto>>;
 }

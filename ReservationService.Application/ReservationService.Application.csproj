@@ -7,13 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\FlashSaleDB\FlashSaleDB\FlashSaleDB.csproj" />
     <ProjectReference Include="..\ReservationService.Domain\ReservationService.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\" />
-    <Folder Include="Validators\" />
-    <Folder Include="Profiles\" />
+    <PackageReference Include="MediatR" Version="11.1.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
   </ItemGroup>
-
 </Project>

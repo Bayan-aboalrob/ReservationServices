@@ -1,4 +1,5 @@
 ﻿using MediatR;
 
 namespace ReservationService.Application.Commands.CancelReservation;
-public record CancelReservationCommand(Guid ReservationId) : IRequest<bool>;
+public sealed record CancelReservationCommand(string ReservationId) : IRequest<bool>;
+

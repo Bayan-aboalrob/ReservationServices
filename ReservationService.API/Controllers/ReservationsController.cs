@@ -1,62 +1,41 @@
-﻿using MediatR;
+﻿// ReservationService.API/Controllers/ReservationsController.cs
+using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ReservationService.Application.Commands.CancelReservation;
 using ReservationService.Application.Commands.ConsumeReservation;
-using ReservationService.Application.Commands.CreateReservation;
 using ReservationService.Application.Dtos;
 using ReservationService.Application.Queries.GetReservation;
 
-namespace ReservationService.API.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class ReservationsController : ControllerBase
+namespace ReservationService.API.Controllers
 {
-    private readonly IMediator _mediator;
-    public ReservationsController(IMediator mediator) => _mediator = mediator;
-
-    [HttpPost]
-    public async Task<ActionResult<ReservationDto>> Create(
-        [FromBody] CreateReservationRequest req,
-        [FromHeader(Name = "X-Idempotency-Key")] string? idempotencyKey,
-        [FromHeader(Name = "X-Correlation-Id")] string? correlationId)
+    [ApiController]
+    [Route("api/[controller]")]
+    public sealed class ReservationsController : ControllerBase
     {
-        var dto = await _mediator.Send(new CreateReservationCommand(
-            req.UserId, req.ProductId, req.Quantity,
-            req.TtlSeconds,
-            idempotencyKey ?? Guid.NewGuid().ToString(),
-            req.UseDistributedMode,
-            string.IsNullOrWhiteSpace(correlationId) ? Guid.NewGuid().ToString() : correlationId!),
-            HttpContext.RequestAborted);
+        private readonly IMediator _mediator;
+        public ReservationsController(IMediator mediator) => _mediator = mediator;
 
-        return Ok(dto);
+        [HttpGet("{id}", Name = "GetReservationById")]
+        public Task<ReservationDto?> GetById(string id)
+            => _mediator.Send(new GetReservationQuery(id));
+
+        [HttpPost("{id}/cancel")]
+        public async Task<IActionResult> Cancel(string id)
+            => await _mediator.Send(new CancelReservationCommand(id)) ? NoContent() : NotFound();
+
+        [HttpPost("{id}/consume")]
+        public async Task<IActionResult> Consume(string id, [FromBody] ConsumeReservationRequest req)
+        {
+            var normalizedId = id.Replace("-", string.Empty);
+
+            var ok = await _mediator.Send(
+                new ConsumeReservationCommand(normalizedId, req.OrderId)
+            );
+
+            return ok ? NoContent() : NotFound();
+        }
     }
 
-    [HttpGet("{id:guid}")]
-    public Task<ReservationDto?> Get(Guid id) =>
-        _mediator.Send(new GetReservationQuery(id), HttpContext.RequestAborted);
-
-    [HttpPost("{id:guid}/cancel")]
-    public async Task<IActionResult> Cancel(Guid id)
-    {
-        var ok = await _mediator.Send(new CancelReservationCommand(id), HttpContext.RequestAborted);
-        return ok ? NoContent() : NotFound();
-    }
-
-    [HttpPost("{id:guid}/consume")]
-    public async Task<IActionResult> Consume(Guid id, [FromBody] ConsumeReservationRequest body)
-    {
-        var ok = await _mediator.Send(new ConsumeReservationCommand(id, body.OrderId), HttpContext.RequestAborted);
-        return ok ? NoContent() : NotFound();
-    }
+    public sealed record ConsumeReservationRequest(string OrderId);
 }
-
-public record CreateReservationRequest(
-    Guid UserId,
-    Guid ProductId,
-    int Quantity,
-    int TtlSeconds,
-    bool UseDistributedMode
-);
-
-public record ConsumeReservationRequest(Guid OrderId);
